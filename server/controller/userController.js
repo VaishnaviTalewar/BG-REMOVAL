@@ -1,60 +1,56 @@
-// API controller function to manage clerk user with database
-//http://localhost:4000/api/user/webhooks
-
-import webhook, { Webhook } from "svix"
-import userModel from './../model/userModel.js';
+import { Webhook } from "svix";
+import userModel from "../model/userModel.js";
 
 export const clerkWebhooks = async (req, res) => {
-    
-    try {
-        //create svix instance with webhook secret
-        const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET)
-        await whook.verify(JSON.stringify(req.body), {
-            "svix-id": req.headers["svix-id"],
-            "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signature": req.headers["svix-signature"]
-        })
-        const { data, type } = req.body;
+  try {
 
-        switch (type) {
-            case "user.created": {
-                const userData =
-                {
-                    clerkId: data.id,
-                    email: data.email_addresses[0].email_address,
-                    firstName: data.first_name,
-                    lastName: data.last_name,
-                    photo: data.image_url
-                }
-                await userModel.create(userData)
-                res.json({})
-                break;
-            }
+    const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-            case "user.updated": {
-                const userData =
-                {
-                    clerkId: data.id,
-                    email: data.email_addresses[0].email_address,
-                    firstName: data.first_name,
-                    lastName: data.last_name,
-                    photo: data.image_url
-                }
-                await userModel.findOneAndUpdate({ clerkId: data.id }, userData)
-                res.json({})
-                break;
-            }
+    // verify webhook
+    const payload = await whook.verify(JSON.stringify(req.body), {
+      "svix-id": req.headers["svix-id"],
+      "svix-timestamp": req.headers["svix-timestamp"],
+      "svix-signature": req.headers["svix-signature"],
+    });
 
-            case "user.deleted": {
-                await userModel.findOneAndDelete({ clerkId: data.id })
-                res.json({})
-                break;
-            }
-            default:
-                break;
-        }
-    } catch (error) {
-        console.log(error.message)
-        res.json({ success: false, message: error.message })
+    const { data, type } = payload;
+
+    switch (type) {
+
+      case "user.created":
+        await userModel.create({
+          clerkId: data.id,
+          email: data.email_addresses[0].email_address,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          photo: data.image_url,
+        });
+        break;
+
+      case "user.updated":
+        await userModel.findOneAndUpdate(
+          { clerkId: data.id },
+          {
+            email: data.email_addresses[0].email_address,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            photo: data.image_url,
+          }
+        );
+        break;
+
+      case "user.deleted":
+        await userModel.findOneAndDelete({ clerkId: data.id });
+        break;
+
+      default:
+        console.log("Unhandled event:", type);
     }
-}
+
+    res.status(200).json({ success: true });
+
+  } catch (error) {
+    console.log("Webhook Error:", error.message);
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
