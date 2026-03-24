@@ -3,64 +3,61 @@ import userModel from "../model/userModel.js";
 
 export const clerkWebhooks = async (req, res) => {
   try {
-
-    // create webhook instance
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    // verify webhook payload
+    // req.body should be raw Buffer (not parsed JSON)
     const evt = whook.verify(req.body, req.headers);
 
     const { data, type } = evt;
 
     switch (type) {
 
-      // when new user signs up
+      // New user signup
       case "user.created":
         await userModel.create({
-          clerkId: data.id,
-          email: data.email_addresses[0].email_address,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          photo: data.image_url,
+          clerkId: data.user.id,  // <- corrected
+          email: data.user.email_addresses[0].email_address,
+          firstName: data.user.first_name,
+          lastName: data.user.last_name,
+          photo: data.user.image_url,
         });
-        console.log("User Created");
+        console.log("User Created:", data.user.id);
         break;
 
-      // when user updates profile
+      // User profile updated
       case "user.updated":
         await userModel.findOneAndUpdate(
-          { clerkId: data.id },
+          { clerkId: data.user.id }, // <- corrected
           {
-            email: data.email_addresses[0].email_address,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            photo: data.image_url,
+            email: data.user.email_addresses[0].email_address,
+            firstName: data.user.first_name,
+            lastName: data.user.last_name,
+            photo: data.user.image_url,
           }
         );
-        console.log("User Updated");
+        console.log("User Updated:", data.user.id);
         break;
 
-      // when user deletes account
+      // User deleted
       case "user.deleted":
-        await userModel.findOneAndDelete({ clerkId: data.id });
-        console.log("User Deleted");
+        await userModel.findOneAndDelete({ clerkId: data.user.id });
+        console.log("User Deleted:", data.user.id);
         break;
 
-      // login event
+      // Login event
       case "session.created":
-        console.log("User Logged In:", data.user_id);
+        console.log("User Logged In:", data.user.id);  // <- corrected
         break;
 
-      // logout event
+      // Logout event
       case "session.removed":
-        console.log("User Logged Out:", data.user_id);
+        console.log("User Logged Out:", data.user.id);  // <- corrected
         break;
 
       default:
         console.log("Unhandled event:", type);
     }
 
-    // success response
     res.status(200).json({ success: true });
 
   } catch (error) {
