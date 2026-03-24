@@ -3,7 +3,7 @@ import express from "express"
 import cors from "cors"
 import connectDB from "./config/mongodb.js"
 import userRouter from "./routes/userRoutes.js"
-import { clerkWebhooks } from "./controllers/userController.js"
+import { clerkWebhooks } from "./controller/userController.js"
 
 //App config
 const PORT = process.env.PORT || 4000
