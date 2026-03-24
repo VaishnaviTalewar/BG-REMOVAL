@@ -3,15 +3,10 @@ import userModel from "../model/userModel.js";
 
 export const clerkWebhooks = async (req, res) => {
   try {
-
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    // verify webhook
-    const payload = await whook.verify(JSON.stringify(req.body), {
-      "svix-id": req.headers["svix-id"],
-      "svix-timestamp": req.headers["svix-timestamp"],
-      "svix-signature": req.headers["svix-signature"],
-    });
+    // req.body is already raw (Buffer), no stringify
+    const payload = whook.verify(req.body, req.headers);
 
     const { data, type } = payload;
 
@@ -19,28 +14,39 @@ export const clerkWebhooks = async (req, res) => {
 
       case "user.created":
         await userModel.create({
-          clerkId: data.id,
-          email: data.email_addresses[0].email_address,
-          firstName: data.first_name,
-          lastName: data.last_name,
-          photo: data.image_url,
+          clerkId: data.user.id,
+          email: data.user.email_addresses[0].email_address,
+          firstName: data.user.first_name,
+          lastName: data.user.last_name,
+          photo: data.user.image_url,
         });
+        console.log("User Created:", data.user.id);
         break;
 
       case "user.updated":
         await userModel.findOneAndUpdate(
-          { clerkId: data.id },
+          { clerkId: data.user.id },
           {
-            email: data.email_addresses[0].email_address,
-            firstName: data.first_name,
-            lastName: data.last_name,
-            photo: data.image_url,
+            email: data.user.email_addresses[0].email_address,
+            firstName: data.user.first_name,
+            lastName: data.user.last_name,
+            photo: data.user.image_url,
           }
         );
+        console.log("User Updated:", data.user.id);
         break;
 
       case "user.deleted":
-        await userModel.findOneAndDelete({ clerkId: data.id });
+        await userModel.findOneAndDelete({ clerkId: data.user.id });
+        console.log("User Deleted:", data.user.id);
+        break;
+
+      case "session.created":
+        console.log("User Logged In:", data.user.id);
+        break;
+
+      case "session.removed":
+        console.log("User Logged Out:", data.user.id);
         break;
 
       default:
