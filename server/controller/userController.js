@@ -3,55 +3,44 @@ import userModel from "../model/userModel.js";
 
 export const clerkWebhooks = async (req, res) => {
   try {
+
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    // raw body required for Svix verification
-    const evt = whook.verify(req.body, req.headers);
+    // verify webhook
+    const payload = await whook.verify(JSON.stringify(req.body), {
+      "svix-id": req.headers["svix-id"],
+      "svix-timestamp": req.headers["svix-timestamp"],
+      "svix-signature": req.headers["svix-signature"],
+    });
 
-    const { data, type } = evt;
+    const { data, type } = payload;
 
     switch (type) {
 
-      // New user signup
       case "user.created":
         await userModel.create({
-          clerkId: data.user.id,
-          email: data.user.email_addresses[0].email_address,
-          firstName: data.user.first_name,
-          lastName: data.user.last_name,
-          photo: data.user.image_url,
+          clerkId: data.id,
+          email: data.email_addresses[0].email_address,
+          firstName: data.first_name,
+          lastName: data.last_name,
+          photo: data.image_url,
         });
-        console.log("User Created:", data.user.id);
         break;
 
-      // User profile update
       case "user.updated":
         await userModel.findOneAndUpdate(
-          { clerkId: data.user.id },
+          { clerkId: data.id },
           {
-            email: data.user.email_addresses[0].email_address,
-            firstName: data.user.first_name,
-            lastName: data.user.last_name,
-            photo: data.user.image_url,
+            email: data.email_addresses[0].email_address,
+            firstName: data.first_name,
+            lastName: data.last_name,
+            photo: data.image_url,
           }
         );
-        console.log("User Updated:", data.user.id);
         break;
 
-      // User deleted
       case "user.deleted":
-        await userModel.findOneAndDelete({ clerkId: data.user.id });
-        console.log("User Deleted:", data.user.id);
-        break;
-
-      // User login
-      case "session.created":
-        console.log("User Logged In:", data.user.id);
-        break;
-
-      // User logout
-      case "session.removed":
-        console.log("User Logged Out:", data.user.id);
+        await userModel.findOneAndDelete({ clerkId: data.id });
         break;
 
       default:
@@ -59,6 +48,7 @@ export const clerkWebhooks = async (req, res) => {
     }
 
     res.status(200).json({ success: true });
+
   } catch (error) {
     console.log("Webhook Error:", error.message);
     res.status(400).json({ success: false, message: error.message });

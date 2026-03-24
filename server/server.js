@@ -14,17 +14,17 @@ await connectDB()
 // CORS
 app.use(cors())
 
-// Normal JSON for API routes
+// JSON for API routes
 app.use(express.json())
 
-// Webhook route must use raw body
+// Webhook route 
 app.post(
   "/api/user/webhooks",
   express.raw({ type: "application/json" }),
   clerkWebhooks
 )
 
-// Normal user routes
+// user routes
 app.use("/api/user", userRouter)
 
 // Test endpoint
