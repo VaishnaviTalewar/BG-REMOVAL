@@ -5,7 +5,7 @@ export const clerkWebhooks = async (req, res) => {
   try {
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    // req.body should be raw Buffer (not parsed JSON)
+    // raw body required for Svix verification
     const evt = whook.verify(req.body, req.headers);
 
     const { data, type } = evt;
@@ -15,7 +15,7 @@ export const clerkWebhooks = async (req, res) => {
       // New user signup
       case "user.created":
         await userModel.create({
-          clerkId: data.user.id,  // <- corrected
+          clerkId: data.user.id,
           email: data.user.email_addresses[0].email_address,
           firstName: data.user.first_name,
           lastName: data.user.last_name,
@@ -24,10 +24,10 @@ export const clerkWebhooks = async (req, res) => {
         console.log("User Created:", data.user.id);
         break;
 
-      // User profile updated
+      // User profile update
       case "user.updated":
         await userModel.findOneAndUpdate(
-          { clerkId: data.user.id }, // <- corrected
+          { clerkId: data.user.id },
           {
             email: data.user.email_addresses[0].email_address,
             firstName: data.user.first_name,
@@ -44,14 +44,14 @@ export const clerkWebhooks = async (req, res) => {
         console.log("User Deleted:", data.user.id);
         break;
 
-      // Login event
+      // User login
       case "session.created":
-        console.log("User Logged In:", data.user.id);  // <- corrected
+        console.log("User Logged In:", data.user.id);
         break;
 
-      // Logout event
+      // User logout
       case "session.removed":
-        console.log("User Logged Out:", data.user.id);  // <- corrected
+        console.log("User Logged Out:", data.user.id);
         break;
 
       default:
@@ -59,7 +59,6 @@ export const clerkWebhooks = async (req, res) => {
     }
 
     res.status(200).json({ success: true });
-
   } catch (error) {
     console.log("Webhook Error:", error.message);
     res.status(400).json({ success: false, message: error.message });
