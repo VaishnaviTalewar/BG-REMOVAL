@@ -14,7 +14,6 @@ await connectDB()
 // CORS
 app.use(cors())
 
-// ----------------------
 // 1️⃣ Webhook route first (raw body required for Svix/Clerk)
 app.post(
   "/api/user/webhooks",
