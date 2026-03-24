@@ -12,6 +12,9 @@ const app = express()
 //mongodb connection
 await connectDB();
 
+//webhook route
+app.use("/api/user",userRouter)
+
 //initialize middleware
 app.use(express.json());
 app.use(cors());
@@ -21,8 +24,7 @@ app.get("/",(req,res)=>{
     res.json("API working..!!")
 })
 
-//webhook route
-app.use("/api/user",userRouter)
+
 
 app.listen(PORT,()=>{
     console.log("Server Running on port", +PORT)
