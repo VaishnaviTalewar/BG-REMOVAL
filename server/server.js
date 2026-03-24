@@ -21,7 +21,7 @@ app.use(express.json())
 // Webhook route must use raw body
 app.post(
   "/api/user/webhooks",
-  express.raw({ type: "application/json" }),
+  express.raw({ type: "application/json" }), 
   clerkWebhooks
 )
 
