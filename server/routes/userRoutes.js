@@ -1,13 +1,10 @@
 import express from "express";
-import { clerkWebhooks } from "../controller/userController.js";
-
 const userRouter = express.Router();
 
-// Webhook route 
-userRouter.post(
-  "/webhooks",
-  express.raw({ type: "application/json" }),
-  clerkWebhooks
-);
+// Only normal user routes, no webhook here
+// Example: get all users
+userRouter.get("/", (req, res) => {
+  res.send("User API working");
+});
 
 export default userRouter;
