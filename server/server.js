@@ -14,17 +14,18 @@ await connectDB()
 // CORS
 app.use(cors())
 
-// JSON for API routes
-app.use(express.json())
-
-// Webhook route 
+// ----------------------
+// 1️⃣ Webhook route first (raw body required for Svix/Clerk)
 app.post(
   "/api/user/webhooks",
   express.raw({ type: "application/json" }),
   clerkWebhooks
 )
 
-// user routes
+// 2️⃣ JSON middleware for all other routes
+app.use(express.json())
+
+// User API routes
 app.use("/api/user", userRouter)
 
 // Test endpoint
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
   res.json("API working..!!")
 })
 
+// Start server
 app.listen(PORT, () => {
   console.log("Server Running on port", PORT)
 })
