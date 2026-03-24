@@ -1,5 +1,4 @@
-
-import "dotenv/config"  
+import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import connectDB from "./config/mongodb.js"
@@ -12,22 +11,20 @@ const app = express()
 //mongodb connection
 await connectDB();
 
-//webhook route
-app.use("/api/user",userRouter)
-
 //initialize middleware
-app.use(express.json());
-app.use(cors());
+app.use(cors())
+app.use(express.json())
+
+//webhook route
+app.use("/api/user", userRouter)
 
 //API routes
-app.get("/",(req,res)=>{
+app.get("/", (req,res)=>{
     res.json("API working..!!")
 })
 
-
-
 app.listen(PORT,()=>{
-    console.log("Server Running on port", +PORT)
+    console.log("Server Running on port", PORT)
 })
 
-export default app;
+export default app
