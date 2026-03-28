@@ -1,12 +1,12 @@
-import { Webhook } from "svix";
+import { messageInRaw, Webhook } from "svix";
 import userModel from "../model/userModel.js";
 
 export const clerkWebhooks = async (req, res) => {
   try {
-    // 1️⃣ Create webhook instance
+    // Create webhook instance
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    // 2️⃣ Verify webhook using raw buffer
+    // Verify webhook using raw buffer
     const payload = whook.verify(req.body, {
       "svix-id": req.headers["svix-id"],
       "svix-timestamp": req.headers["svix-timestamp"],
@@ -15,10 +15,10 @@ export const clerkWebhooks = async (req, res) => {
 
     const { type, data } = payload;
 
-    // 3️⃣ Determine where the user object is
+    // Determine where the user object is
     const userObj = data.user || data;
 
-    // 4️⃣ Build user data safely
+    // Build user data 
     const userData = {
       clerkId: userObj.id,
       email: userObj.email_addresses?.[0]?.email_address || "",
@@ -27,7 +27,7 @@ export const clerkWebhooks = async (req, res) => {
       photo: userObj.image_url || "",
     };
 
-    // 5️⃣ Handle events
+    // 5Handle events
     if (type === "user.created") {
       try {
         const newUser = await userModel.create(userData);
@@ -57,10 +57,26 @@ export const clerkWebhooks = async (req, res) => {
       console.log("Unhandled event type:", type);
     }
 
-    // 6️⃣ Respond to Clerk
+    //  Respond to Clerk
     res.status(200).json({ success: true });
   } catch (err) {
     console.error("Webhook Error:", err.message);
     res.status(400).json({ success: false, message: err.message });
   }
 };
+
+// to get users credit data (when avaiable)
+
+export const userCredit = async () => {
+  try {
+    const { clerkId } = req.body
+    const userData = await userModel.findOne({ clerkId })
+
+    res.json({ success: true, credits: userData.creditBalance })
+
+  } catch (error) {
+    console.log(error)
+    res.json({ success: false, message: error.message })
+  }
+}
+
