@@ -83,6 +83,8 @@ const AppContextProvider = (props) => {
     image,
     setImage,
     removeBg,
+    resultImg,
+    setResultImg
   };
 
   return (
