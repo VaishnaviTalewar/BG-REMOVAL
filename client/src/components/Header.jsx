@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { assets } from "../assets/assets";
+import { AppContext } from "../context/AppContext.jsx";
 
 const Header = () => {
+
+  const { removeBg } = useContext(AppContext);
+
   return (
     <div className="relative px-6 lg:px-32 py-20 overflow-hidden bg-gradient-to-br from-white via-purple-50 to-pink-50">
 
@@ -15,13 +19,10 @@ const Header = () => {
         <div className="max-w-xl text-center lg:text-left">
 
           <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
-
-            Remove Image  
-
+            Remove Image
             <span className="block bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent">
               Backgrounds
             </span>
-
             Instantly with AI
           </h1>
 
@@ -33,7 +34,13 @@ const Header = () => {
           {/* Upload Button */}
           <div className="mt-10">
 
-            <input type="file" id="upload1" hidden />
+            <input
+              onChange={(e) => removeBg(e.target.files[0])}
+              type="file"
+              accept="image/*"
+              id="upload1"
+              hidden
+            />
 
             <label
               htmlFor="upload1"

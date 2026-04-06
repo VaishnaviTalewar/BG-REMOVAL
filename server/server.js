@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/mongodb.js";
 import { clerkWebhooks } from "./controller/userController.js";
 import userRouter from "./routes/userRoutes.js";
+import imgRouter from './routes/imgRoutes.js';
 
 const PORT = process.env.PORT || 4000;
 const app = express();
@@ -13,15 +14,17 @@ await connectDB();
 
 // CORS
 app.use(cors());
-
-// 1️⃣ Webhook route first (raw body required by Svix/Clerk)
+// Webhook route first (raw body required by Svix/Clerk)
 app.post("/api/user/webhooks", express.raw({ type: "application/json" }), clerkWebhooks);
 
-// 2️⃣ JSON middleware for all other routes
+// JSON middleware for all other routes
 app.use(express.json());
 
 // User API routes
 app.use("/api/user", userRouter);
+
+//for bg removal routes
+app.use("/api/img", imgRouter)
 
 // Test endpoint
 app.get("/", (req, res) => {

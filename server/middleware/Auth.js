@@ -1,23 +1,32 @@
-import jwt from "jsonwebtoken"
-
-
-//middleware func to decode jwt token to get clerk id
+import jwt from "jsonwebtoken";
 
 export const authUser = async (req, res, next) => {
-    try {
+  try {
 
-        const { token } = req.headers
+    const authHeader = req.headers.authorization;
 
-        if (!token) {
-            return res.json({ success: false, message: "Not valid login again" });
-        }
-
-        const token_decode = jwt.decode(token)
-        req.body.clerkId = token_decode.clerkId
-        next()
-    } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+    if (!authHeader) {
+      return res.json({
+        success: false,
+        message: "Not authorized. Login again."
+      });
     }
-}
 
+    // "Bearer TOKEN"
+    const token = authHeader.split(" ")[1];
+
+    const token_decode = jwt.decode(token);
+
+    // Clerk user id
+    req.clerkId = token_decode.sub;
+
+    next();
+
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message
+    });
+  }
+};
