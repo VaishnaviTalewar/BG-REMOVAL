@@ -4,6 +4,7 @@ import connectDB from "./config/mongodb.js";
 import userRouter from "./routes/userRoutes.js";
 import imgRouter from "./routes/imgRoutes.js";
 import { clerkWebhooks } from "./controller/userController.js";
+import { requireAuth } from "@clerk/express";
 
 const app = express();
 
@@ -38,12 +39,20 @@ app.post(
   clerkWebhooks
 );
 
+// Clerk auth middleware
+// app.use(requireAuth());
+
 // routes
 app.use("/api/user", userRouter);
 app.use("/api/img", imgRouter);
 
 app.get("/", (req, res) => {
   res.json({ success: true, message: "API working" });
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 export default app;

@@ -4,7 +4,7 @@ import { AppContext } from "../context/AppContext.jsx";
 
 const Upload = () => {
 
-  const {removebg} = useContext(AppContext)
+  const {removeBg} = useContext(AppContext)
 
   return (
     <div className="relative py-28 px-6 lg:px-32 bg-gradient-to-b from-white via-violet-50 to-pink-50 overflow-hidden">
@@ -29,7 +29,7 @@ const Upload = () => {
         {/* Upload Button */}
         <div className="mt-10">
 
-          <input onChange={e => e.target.files[0]} type="file" id="upload2" accept="image/*" hidden />
+          <input onChange={e => removeBg(e.target.files[0])} type="file" id="upload2" accept="image/*" hidden />
 
           <label
             htmlFor="upload2"

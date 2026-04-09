@@ -1,10 +1,9 @@
 import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
-import { createContext, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
-export const AppContext = createContext();
+import { AppContext } from "./AppContext.js";
 
 const AppContextProvider = (props) => {
 
@@ -17,12 +16,12 @@ const AppContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const { getToken } = useAuth();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const { openSignIn } = useClerk();
 
 
   // LOAD USER CREDITS
-  const loadCreditsData = async () => {
+  const loadCreditsData = useCallback(async () => {
 
     try {
 
@@ -48,7 +47,14 @@ const AppContextProvider = (props) => {
 
     }
 
-  };
+  }, [getToken, backendUrl]);
+
+  useEffect(() => {
+    if (isSignedIn && user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadCreditsData();
+    }
+  }, [isSignedIn, user, loadCreditsData]);
 
 
   // REMOVE BACKGROUND FUNCTION
@@ -139,3 +145,4 @@ const AppContextProvider = (props) => {
 };
 
 export default AppContextProvider;
+export { AppContext };

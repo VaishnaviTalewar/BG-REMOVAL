@@ -1,4 +1,5 @@
 import { Webhook } from "svix";
+import { clerkClient } from "@clerk/express";
 import userModel from "../model/userModel.js";
 
 
@@ -54,17 +55,21 @@ export const clerkWebhooks = async (req, res) => {
 export const userCredit = async (req, res) => {
   try {
 
+    console.log("userCredit called");
     const clerkId = req.clerkId;
+    console.log("clerkId:", clerkId);
 
-    const user = await userModel.findOne({ clerkId });
+    let user = await userModel.findOne({ clerkId });
+    console.log("user found:", user);
 
-    // IMPORTANT FIX
+    // If user not found, create with default credits
     if (!user) {
-      return res.json({
-        success: false,
-        credits: 0,
-        message: "User not found in database"
+      console.log("creating user");
+      user = await userModel.create({
+        clerkId,
+        creditBalance: 5
       });
+      console.log("user created:", user);
     }
 
     res.json({
@@ -74,6 +79,7 @@ export const userCredit = async (req, res) => {
 
   } catch (error) {
 
+    console.log("error in userCredit:", error);
     res.json({
       success: false,
       message: error.message
