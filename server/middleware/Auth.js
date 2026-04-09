@@ -1,32 +1,19 @@
-import jwt from "jsonwebtoken";
+import { clerkClient } from "@clerk/express";
 
 export const authUser = async (req, res, next) => {
   try {
 
-    const authHeader = req.headers.authorization;
+    const { userId } = req.auth;
 
-    if (!authHeader) {
-      return res.json({
-        success: false,
-        message: "Not authorized. Login again."
-      });
+    if (!userId) {
+      return res.json({ success: false, message: "Not Authorized" });
     }
 
-    // "Bearer TOKEN"
-    const token = authHeader.split(" ")[1];
-
-    const token_decode = jwt.decode(token);
-
-    // Clerk user id
-    req.clerkId = token_decode.sub;
+    req.clerkId = userId;
 
     next();
 
   } catch (error) {
-    console.log(error);
-    res.json({
-      success: false,
-      message: error.message
-    });
+    res.json({ success: false, message: error.message });
   }
 };

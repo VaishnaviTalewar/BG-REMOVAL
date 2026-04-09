@@ -1,37 +1,49 @@
 import "dotenv/config";
 import express from "express";
-import cors from "cors";
 import connectDB from "./config/mongodb.js";
-import { clerkWebhooks } from "./controller/userController.js";
 import userRouter from "./routes/userRoutes.js";
-import imgRouter from './routes/imgRoutes.js';
+import imgRouter from "./routes/imgRoutes.js";
+import { clerkWebhooks } from "./controller/userController.js";
 
-const PORT = process.env.PORT || 4000;
 const app = express();
 
-// Connect MongoDB
-await connectDB();
+// connect database
+connectDB();
 
-// CORS
-app.use(cors());
-// Webhook route first (raw body required by Svix/Clerk)
-app.post("/api/user/webhooks", express.raw({ type: "application/json" }), clerkWebhooks);
+// CORS fix
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
 
-// JSON middleware for all other routes
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
 app.use(express.json());
 
-// User API routes
+// clerk webhook
+app.post(
+  "/api/user/webhooks",
+  express.raw({ type: "application/json" }),
+  clerkWebhooks
+);
+
+// routes
 app.use("/api/user", userRouter);
+app.use("/api/img", imgRouter);
 
-//for bg removal routes
-app.use("/api/img", imgRouter)
-
-// Test endpoint
 app.get("/", (req, res) => {
-  res.json("API working..!!");
+  res.json({ success: true, message: "API working" });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log("Server Running on port", PORT);
-});
+export default app;

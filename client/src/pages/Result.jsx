@@ -25,7 +25,6 @@ const Result = () => {
         </p>
       </div>
 
-
       {/* Image Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
@@ -48,8 +47,6 @@ const Result = () => {
 
         </div>
 
-
-
         {/* Result Image */}
         <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition duration-300 flex flex-col">
 
@@ -62,11 +59,8 @@ const Result = () => {
             {/* Loading */}
             {!resultImg && image && (
               <div className="flex flex-col items-center gap-3 text-gray-400">
-
                 <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-
                 <p className="text-sm">Processing image...</p>
-
               </div>
             )}
 
@@ -85,19 +79,18 @@ const Result = () => {
 
       </div>
 
-
-
       {/* Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-5 mt-14">
 
         {/* Try again */}
-        <button
-          onClick={tryAnother}
-          className="px-8 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg hover:scale-105 hover:shadow-xl transition duration-300"
-        >
-          🔄 Try another image
-        </button>
-
+        {resultImg && (
+          <button
+            onClick={tryAnother}
+            className="px-8 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg hover:scale-105 hover:shadow-xl transition duration-300"
+          >
+            🔄 Try another image
+          </button>
+        )}
 
         {/* Download */}
         {resultImg && (

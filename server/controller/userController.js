@@ -1,106 +1,83 @@
 import { Webhook } from "svix";
 import userModel from "../model/userModel.js";
 
-// CLERK WEBHOOK
 
+// CLERK WEBHOOK
 export const clerkWebhooks = async (req, res) => {
   try {
 
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    const payload = whook.verify(req.body, {
+    const evt = whook.verify(req.body, {
       "svix-id": req.headers["svix-id"],
       "svix-timestamp": req.headers["svix-timestamp"],
-      "svix-signature": req.headers["svix-signature"],
+      "svix-signature": req.headers["svix-signature"]
     });
 
-    const { type, data } = payload;
+    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
 
-    const userObj = data.user || data;
+    const eventType = evt.type;
 
-    const userData = {
-      clerkId: userObj.id,
-      email: userObj.email_addresses?.[0]?.email_address || "",
-      firstName: userObj.first_name || "",
-      lastName: userObj.last_name || "",
-      photo: userObj.image_url || "",
-    };
 
-    // USER CREATED 
+    // CREATE USER
+    if (eventType === "user.created") {
 
-    if (type === "user.created") {
+      const userData = {
+        clerkId: id,
+        email: email_addresses[0].email_address,
+        firstname: first_name,
+        lastname: last_name,
+        photo: image_url,
+        creditBalance: 5
+      };
 
-      const newUser = await userModel.create(userData);
-
-      console.log("User Created:", newUser.clerkId);
+      await userModel.create(userData);
     }
 
-    // USER UPDATED
 
-    else if (type === "user.updated") {
-
-      const updatedUser = await userModel.findOneAndUpdate(
-        { clerkId: userObj.id },
-        userData,
-        { new: true, upsert: true }
-      );
-
-      console.log("User Updated:", updatedUser?.clerkId);
+    // DELETE USER
+    if (eventType === "user.deleted") {
+      await userModel.findOneAndDelete({ clerkId: id });
     }
 
-    // USER DELETED
-
-    else if (type === "user.deleted") {
-
-      const deletedUser = await userModel.findOneAndDelete({
-        clerkId: userObj.id,
-      });
-
-      console.log("User Deleted:", deletedUser?.clerkId);
-    }
-
-    res.status(200).json({ success: true });
+    res.json({ success: true });
 
   } catch (error) {
-
-    console.log("Webhook Error:", error.message);
-
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
 };
 
 
-// GET USER CREDITS
 
+// GET USER CREDITS
 export const userCredit = async (req, res) => {
   try {
 
     const clerkId = req.clerkId;
 
-    const userData = await userModel.findOne({ clerkId });
+    const user = await userModel.findOne({ clerkId });
 
-    if (!userData) {
+    // IMPORTANT FIX
+    if (!user) {
       return res.json({
         success: false,
-        message: "User not found",
+        credits: 0,
+        message: "User not found in database"
       });
     }
 
     res.json({
       success: true,
-      credits: userData.creditBalance,
+      credits: user.creditBalance
     });
 
   } catch (error) {
 
-    console.log(error);
-
     res.json({
       success: false,
-      message: error.message,
+      message: error.message
     });
+
   }
 };

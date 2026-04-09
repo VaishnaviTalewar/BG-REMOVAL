@@ -3,88 +3,58 @@ import fs from "fs";
 import FormData from "form-data";
 import userModel from "../model/userModel.js";
 
-export const removeBgImg = async (req, res) => {
+export const removeBg = async (req, res) => {
   try {
 
     const clerkId = req.clerkId;
 
     const user = await userModel.findOne({ clerkId });
 
-    if (!user) {
+    if (!user || user.creditBalance <= 0) {
       return res.json({
         success: false,
-        message: "User not found"
+        message: "No credits left"
       });
     }
 
-    if (user.creditBalance <= 0) {
-      return res.json({
-        success: false,
-        message: "Insufficient credits",
-        creditBalance: user.creditBalance
-      });
-    }
-
-    // check file
-    if (!req.file) {
-      return res.json({
-        success: false,
-        message: "Image not uploaded"
-      });
-    }
-
-    const imgPath = req.file.path;
-
-    console.log("Image path:", imgPath);
-    console.log("Credits Before:", user.creditBalance);
-
-    const imgFile = fs.createReadStream(imgPath);
+    const imagePath = req.file.path;
 
     const formData = new FormData();
-    formData.append("image_file", imgFile);
+    formData.append("image_file", fs.createReadStream(imagePath));
+    formData.append("size", "auto");
 
-    // call clipdrop API
     const response = await axios.post(
-      "https://clipdrop-api.co/remove-background/v1",
+      "https://api.remove.bg/v1.0/removebg",
       formData,
       {
         headers: {
-          "x-api-key": process.env.CLIPDROP_API_KEY,
-          ...formData.getHeaders()
+          ...formData.getHeaders(),
+          "X-Api-Key": process.env.REMOVE_BG_API_KEY
         },
         responseType: "arraybuffer"
       }
     );
 
-    const base64Img = Buffer.from(response.data).toString("base64");
+    const base64Image = Buffer.from(response.data, "binary").toString("base64");
 
-    const resultImg = `data:${req.file.mimetype};base64,${base64Img}`;
+    const resultImage = `data:image/png;base64,${base64Image}`;
 
-    // deduct credit
-    const updatedUser = await userModel.findByIdAndUpdate(
-      user._id,
-      { $inc: { creditBalance: -1 } },
-      { returnDocument: "after" }
-    );
-
-    console.log("Credits After:", updatedUser.creditBalance);
-
-    // delete uploaded file
-    fs.unlinkSync(imgPath);
+    user.creditBalance -= 1;
+    await user.save();
 
     res.json({
       success: true,
-      resultImg,
-      creditBalance: updatedUser.creditBalance
+      resultImage,
+      credits: user.creditBalance
     });
 
   } catch (error) {
 
-    console.log("Remove BG Error:", error.response?.data || error.message);
+    console.log(error);
 
-    res.status(500).json({
+    res.json({
       success: false,
-      message: "Image processing failed"
+      message: error.message
     });
 
   }
