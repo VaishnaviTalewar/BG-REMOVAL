@@ -8,9 +8,9 @@ const imgRouter = express.Router();
 // Remove Background API
 imgRouter.post(
   "/remove-bg",
-  authUser,                 //  pehle user authenticate hoga
-  upload.single("image"),   //  fir image upload hogi
-  removeBg               // fir controller run hoga
+  authUser,              // user authenticate
+  upload.single("image"), // image upload
+  removeBg               // controller
 );
 
 export default imgRouter;

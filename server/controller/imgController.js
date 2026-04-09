@@ -1,5 +1,4 @@
 import axios from "axios";
-import fs from "fs";
 import FormData from "form-data";
 import userModel from "../model/userModel.js";
 
@@ -17,10 +16,19 @@ export const removeBg = async (req, res) => {
       });
     }
 
-    const imagePath = req.file.path;
+    if (!req.file) {
+      return res.json({
+        success: false,
+        message: "No image uploaded"
+      });
+    }
 
     const formData = new FormData();
-    formData.append("image_file", fs.createReadStream(imagePath));
+
+    formData.append("image_file", req.file.buffer, {
+      filename: "image.png"
+    });
+
     formData.append("size", "auto");
 
     const response = await axios.post(
