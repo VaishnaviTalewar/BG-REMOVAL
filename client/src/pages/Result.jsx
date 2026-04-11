@@ -54,7 +54,15 @@ const Result = () => {
             Background Removed
           </p>
 
-          <div className="rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center min-h-[300px]">
+          <div
+            className="rounded-xl overflow-hidden flex items-center justify-center min-h-[300px]"
+            style={{
+              backgroundImage:
+                "linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0), linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0)",
+              backgroundSize: "20px 20px",
+              backgroundPosition: "0 0, 10px 10px"
+            }}
+          >
 
             {/* Loading */}
             {!resultImg && image && (
@@ -69,7 +77,7 @@ const Result = () => {
               <img
                 src={resultImg}
                 alt="removed background"
-                className="w-full object-cover hover:scale-105 transition duration-500"
+                className="w-full object-contain hover:scale-105 transition duration-500"
               />
             )}
 

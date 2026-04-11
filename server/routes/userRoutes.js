@@ -1,6 +1,6 @@
 import express from "express";
 import { authUser } from "../middleware/Auth.js";
-import { userCredit } from "../controller/userController.js";
+import { userCredit, updateCredits } from "../controller/userController.js";
 
 const userRouter = express.Router();
 
@@ -11,5 +11,8 @@ userRouter.get("/", (req, res) => {
 
 // get credits
 userRouter.get("/credits", authUser, userCredit);
+
+// update credits
+userRouter.post("/update-credits", authUser, updateCredits);
 
 export default userRouter;

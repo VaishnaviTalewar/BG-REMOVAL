@@ -51,6 +51,50 @@ export const clerkWebhooks = async (req, res) => {
 
 
 
+// UPDATE USER CREDITS
+export const updateCredits = async (req, res) => {
+  try {
+    const { planId } = req.body;
+    const clerkId = req.clerkId;
+
+    let user = await userModel.findOne({ clerkId });
+
+    // If user not found, create with default credits
+    if (!user) {
+      user = await userModel.create({
+        clerkId,
+        creditBalance: 5
+      });
+    }
+
+    // Define credits for plans
+    const creditPlans = {
+      'Basic': 100,
+      'Advanced': 500,
+      'Business': 5000
+    };
+
+    const creditsToAdd = creditPlans[planId];
+
+    if (!creditsToAdd) {
+      return res.json({ success: false, message: 'Invalid plan' });
+    }
+
+    user.creditBalance += creditsToAdd;
+    await user.save();
+
+    res.json({
+      success: true,
+      credits: user.creditBalance,
+      message: `${creditsToAdd} credits added`
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 // GET USER CREDITS
 export const userCredit = async (req, res) => {
   try {
@@ -78,12 +122,10 @@ export const userCredit = async (req, res) => {
     });
 
   } catch (error) {
-
     console.log("error in userCredit:", error);
     res.json({
       success: false,
       message: error.message
     });
-
   }
 };

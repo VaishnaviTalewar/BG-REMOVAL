@@ -19,6 +19,7 @@ const AppContextProvider = (props) => {
   const { isSignedIn, user } = useUser();
   const { openSignIn } = useClerk();
 
+  const clerkId = user?.id || user?.userId || null;
 
   // LOAD USER CREDITS
   const loadCreditsData = useCallback(async () => {
@@ -27,13 +28,15 @@ const AppContextProvider = (props) => {
 
       const token = await getToken();
 
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      if (clerkId) {
+        headers["X-Clerk-Id"] = clerkId;
+      }
       const { data } = await axios.get(
         backendUrl + "/api/user/credits",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        { headers }
       );
 
       if (data.success) {
@@ -47,7 +50,7 @@ const AppContextProvider = (props) => {
 
     }
 
-  }, [getToken, backendUrl]);
+  }, [getToken, backendUrl, user]);
 
   useEffect(() => {
     if (isSignedIn && user) {
@@ -82,7 +85,8 @@ const AppContextProvider = (props) => {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            "X-Clerk-Id": clerkId
           }
         }
       );

@@ -1,5 +1,6 @@
 import axios from "axios";
 import FormData from "form-data";
+import fs from "fs";
 import userModel from "../model/userModel.js";
 
 export const removeBg = async (req, res) => {
@@ -7,9 +8,17 @@ export const removeBg = async (req, res) => {
 
     const clerkId = req.clerkId;
 
-    const user = await userModel.findOne({ clerkId });
+    let user = await userModel.findOne({ clerkId });
 
-    if (!user || user.creditBalance <= 0) {
+    // If user not found, create with default credits
+    if (!user) {
+      user = await userModel.create({
+        clerkId,
+        creditBalance: 5
+      });
+    }
+
+    if (user.creditBalance <= 0) {
       return res.json({
         success: false,
         message: "No credits left"
@@ -23,28 +32,27 @@ export const removeBg = async (req, res) => {
       });
     }
 
+    const imageStream = fs.createReadStream(req.file.path);
+
     const formData = new FormData();
 
-    formData.append("image_file", req.file.buffer, {
-      filename: "image.png"
+    formData.append("image_file", imageStream, {
+      filename: req.file.originalname
     });
 
-    formData.append("size", "auto");
-
     const response = await axios.post(
-      "https://api.remove.bg/v1.0/removebg",
+      "https://clipdrop-api.co/remove-background/v1",
       formData,
       {
         headers: {
           ...formData.getHeaders(),
-          "X-Api-Key": process.env.REMOVE_BG_API_KEY
+          "x-api-key": process.env.CLIPDROP_API_KEY
         },
         responseType: "arraybuffer"
       }
     );
 
     const base64Image = Buffer.from(response.data, "binary").toString("base64");
-
     const resultImage = `data:image/png;base64,${base64Image}`;
 
     user.creditBalance -= 1;

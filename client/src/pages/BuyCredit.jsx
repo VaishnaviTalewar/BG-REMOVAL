@@ -1,7 +1,45 @@
-import React from "react";
+import React, { useContext } from "react";
 import { assets, plans } from "../assets/assets";
+import { AppContext } from "../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 const BuyCredit = () => {
+
+  const { loadCreditsData } = useContext(AppContext);
+  const { getToken } = useAuth();
+  const { user } = useUser();
+  const clerkId = user?.id || user?.userId || null;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const buyCredits = async (planId) => {
+    try {
+      const token = await getToken();
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      if (clerkId) {
+        headers["X-Clerk-Id"] = clerkId;
+      }
+      const { data } = await axios.post(
+        backendUrl + "/api/user/update-credits",
+        { planId },
+        { headers }
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        loadCreditsData(); // refresh credits
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 px-6 lg:px-32 py-16">
 
@@ -60,7 +98,10 @@ const BuyCredit = () => {
             </div>
 
             {/* Button */}
-            <button className="mt-8 px-7 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md hover:scale-105 hover:shadow-xl transition">
+            <button 
+              onClick={() => buyCredits(item.id)}
+              className="mt-8 px-7 py-3 rounded-full text-white font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 shadow-md hover:scale-105 hover:shadow-xl transition"
+            >
               Buy Now
             </button>
 
