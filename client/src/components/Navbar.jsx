@@ -1,5 +1,5 @@
 import { assets } from "./../assets/assets";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
@@ -8,6 +8,8 @@ const Navbar = () => {
   const { openSignIn } = useClerk();
   const { isSignedIn, user } = useUser();
   const { credits } = useContext(AppContext);
+
+  const navigate = useNavigate()
 
   return (
     <div className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200">
@@ -28,7 +30,9 @@ const Navbar = () => {
             
             {/* Credits Badge */}
             <div className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-blue-200 px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
-              <img className="w-5" src={assets.credit_icon} alt="credit" />
+              <button onClick={() => navigate("/buy")} className="flex items-center gap-1  text-white px-3 py-1 rounded-full text-xs font-semibold  hover:shadow-lg hover:scale-105 transition-all duration-300">
+                <img className="w-5" src={assets.credit_icon} alt="credit" />
+              </button>
               <p className="text-sm font-semibold text-blue-800">
                 Credits : {credits}
               </p>

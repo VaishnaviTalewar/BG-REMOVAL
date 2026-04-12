@@ -1,6 +1,7 @@
 import { Webhook } from "svix";
 import { clerkClient } from "@clerk/express";
 import userModel from "../model/userModel.js";
+import razorpay from "razorpay"
 
 
 // CLERK WEBHOOK
@@ -129,3 +130,79 @@ export const userCredit = async (req, res) => {
     });
   }
 };
+
+//razorpay gateway instance
+
+export const razorPayInstance = new razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+//api to make payemnt for crdits
+
+export const paymentRazorPay = async (req, res) => {
+  try {
+    const { clerkId, planId } = req.body;
+    const userData = await userModel.findOne({
+      clerkId
+    })
+
+    if (!userData || !planId) {
+      return res.json({ success: false, message: "Invalid user or plan" })
+    }
+    let credits, plan, amount, date
+
+    switch (planId) {
+      case "basic":
+        credits = 100;
+        plan = "Basic";
+        amount = 10;
+        break;
+
+      case "advanced":
+        credits = 500;
+        plan = "Advanced";
+        amount = 50;
+        break;
+
+      case "business":
+        credits = 5000;
+        plan = "Business";
+        amount = 250;
+        break;
+
+      default:
+        break;
+    }
+
+    date = Date.now()
+
+    //creating trasaction in razorpay
+    const transactionData = {
+      clerkId,
+      plan,
+      credits,
+      amount,
+      date
+    }
+
+    const newTransaction = await TransactionModel.create(transactionData)
+    const options = {
+      amount: amount * 100,//amount in paise
+      currency: process.env.CURRENCY,
+      receipt: newTransaction._id.toString()
+    }
+
+    await razorPayInstance.orders.create(options, async (err, order) => {
+      if (err) {
+        return res.json({ success: false, message: err.message })
+      }
+
+      res.json({ success: true, order })
+    })
+
+  } catch (error) {
+    console.log(error)
+    res.json({ success: false, message: error.message })
+  }
+}
