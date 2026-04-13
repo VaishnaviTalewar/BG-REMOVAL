@@ -1,6 +1,5 @@
 import axios from "axios";
 import FormData from "form-data";
-import fs from "fs";
 import userModel from "../model/userModel.js";
 
 export const removeBg = async (req, res) => {
@@ -32,12 +31,11 @@ export const removeBg = async (req, res) => {
       });
     }
 
-    const imageStream = fs.createReadStream(req.file.path);
-
     const formData = new FormData();
 
-    formData.append("image_file", imageStream, {
-      filename: req.file.originalname
+    formData.append("image_file", req.file.buffer, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype
     });
 
     const response = await axios.post(
