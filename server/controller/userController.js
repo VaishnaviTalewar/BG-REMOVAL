@@ -1,7 +1,9 @@
 import { Webhook } from "svix";
 import { clerkClient } from "@clerk/express";
 import userModel from "../model/userModel.js";
+import TransactionModel from "../model/transcationModel.js";
 import razorpay from "razorpay"
+import crypto from "crypto"
 
 
 // CLERK WEBHOOK
@@ -142,7 +144,8 @@ export const razorPayInstance = new razorpay({
 
 export const paymentRazorPay = async (req, res) => {
   try {
-    const { clerkId, planId } = req.body;
+    const { planId } = req.body;
+    const clerkId = req.clerkId;
     const userData = await userModel.findOne({
       clerkId
     })
@@ -152,7 +155,8 @@ export const paymentRazorPay = async (req, res) => {
     }
     let credits, plan, amount, date
 
-    switch (planId) {
+    const planLower = planId.toLowerCase();
+    switch (planLower) {
       case "basic":
         credits = 100;
         plan = "Basic";
@@ -172,7 +176,7 @@ export const paymentRazorPay = async (req, res) => {
         break;
 
       default:
-        break;
+        return res.json({ success: false, message: "Invalid plan" })
     }
 
     date = Date.now()
@@ -204,5 +208,61 @@ export const paymentRazorPay = async (req, res) => {
   } catch (error) {
     console.log(error)
     res.json({ success: false, message: error.message })
+  }
+}
+
+//api to verify payment for credits
+export const verifyRazorPay = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.json({ success: false, message: 'Invalid payment response from Razorpay' });
+    }
+
+    const sign = razorpay_order_id + '|' + razorpay_payment_id;
+
+    const expectedSign = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(sign.toString())
+      .digest('hex');
+
+    if (razorpay_signature !== expectedSign) {
+      return res.json({ success: false, message: 'Invalid Signature' });
+    }
+
+    const orderInfo = await razorPayInstance.orders.fetch(razorpay_order_id);
+    const paymentInfo = await razorPayInstance.payments.fetch(razorpay_payment_id);
+
+    const isPaid =
+      orderInfo?.status === 'paid' ||
+      paymentInfo?.status === 'captured' ||
+      paymentInfo?.status === 'authorized';
+
+    if (!isPaid) {
+      return res.json({ success: false, message: `Payment not completed (status: ${paymentInfo?.status || orderInfo?.status})` });
+    }
+
+    const transactionData = await TransactionModel.findById(orderInfo.receipt);
+    if (!transactionData) {
+      return res.json({ success: false, message: 'Transaction not found' });
+    }
+
+    if (transactionData.payment) {
+      return res.json({ success: false, message: 'Payment Already Verified' });
+    }
+
+    const userData = await userModel.findOne({ clerkId: transactionData.clerkId });
+    if (!userData) {
+      return res.json({ success: false, message: 'User not found' });
+    }
+
+    const creditBalance = userData.creditBalance + transactionData.credits;
+    await userModel.findByIdAndUpdate(userData._id, { creditBalance });
+    await TransactionModel.findByIdAndUpdate(transactionData._id, { payment: true });
+
+    res.json({ success: true, message: 'Credits Added' });
+  } catch (error) {
+    console.log('verifyRazorPay error:', error);
+    res.json({ success: false, message: error.message });
   }
 }
