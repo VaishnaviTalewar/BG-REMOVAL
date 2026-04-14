@@ -9,11 +9,11 @@ const BgSlider = () => {
   };
 
   return (
-    <div className="relative py-24 px-6 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
-
+    <div className="relative py-24 px-4 sm:px-6 lg:px-10 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto">
       {/* Glow Background */}
-      <div className="absolute -top-40 left-20 w-[320px] h-[320px] bg-purple-300 opacity-30 blur-[140px] rounded-full"></div>
-      <div className="absolute -bottom-40 right-20 w-[320px] h-[320px] bg-pink-300 opacity-30 blur-[140px] rounded-full"></div>
+      <div className="absolute -top-40 left-4 sm:left-20 w-72 sm:w-[320px] h-72 sm:h-[320px] bg-purple-300 opacity-30 blur-[140px] rounded-full"></div>
+      <div className="absolute -bottom-40 right-4 sm:right-20 w-72 sm:w-[320px] h-72 sm:h-[320px] bg-pink-300 opacity-30 blur-[140px] rounded-full"></div>
 
       {/* Title */}
       <h1 className="mb-16 text-center text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight">
@@ -71,6 +71,7 @@ const BgSlider = () => {
         />
       </div>
     </div>
+  </div>
   );
 };
 

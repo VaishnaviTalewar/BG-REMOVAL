@@ -7,7 +7,9 @@ const Header = () => {
   const { removeBg } = useContext(AppContext);
 
   return (
-    <div className="relative px-6 lg:px-32 py-20 overflow-hidden bg-gradient-to-br from-white via-purple-50 to-pink-50">
+    <div className="relative px-6 sm:px-8 lg:px-12 xl:px-16 py-20 overflow-hidden bg-gradient-to-br from-white via-purple-50 to-pink-50">
+
+      <div className="max-w-screen-xl mx-auto">
 
       {/* Gradient Blur Shapes */}
       <div className="absolute -top-40 -left-32 w-[350px] h-[350px] bg-purple-400 opacity-30 blur-[140px] rounded-full"></div>
@@ -93,6 +95,7 @@ const Header = () => {
         </div>
 
       </div>
+    </div>
     </div>
   );
 };

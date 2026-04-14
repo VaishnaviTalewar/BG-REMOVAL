@@ -13,6 +13,7 @@ const BuyCredit = () => {
   const { getToken } = useAuth();
   const { user, isLoaded, isSignedIn } = useUser();
 
+  const clerkId = user?.id ?? user?.userId ?? null;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,7 @@ const BuyCredit = () => {
             {
               headers: {
                 Authorization: `Bearer ${token}`,
-                "x-clerk-id": user.id,
+                "x-clerk-id": clerkId,
               },
             }
           );
@@ -99,7 +100,7 @@ const BuyCredit = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "x-clerk-id": user.id,
+            "x-clerk-id": clerkId,
           },
         }
       );
@@ -119,8 +120,8 @@ const BuyCredit = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 px-6 lg:px-32 py-16">
-      
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 px-4 sm:px-6 lg:px-10 py-16">
+      <div className="max-w-screen-xl mx-auto">
       {/* Header */}
       <div className="text-center mb-16">
         <button className="px-5 py-2 text-sm font-semibold text-purple-600 bg-purple-100 rounded-full mb-4">
@@ -184,6 +185,7 @@ const BuyCredit = () => {
         ))}
       </div>
     </div>
+  </div>
   );
 };
 

@@ -109,6 +109,11 @@ export const userCredit = async (req, res) => {
     let user = await userModel.findOne({ clerkId });
     console.log("user found:", user);
 
+    if (user && (user.creditBalance === undefined || user.creditBalance === null)) {
+      user.creditBalance = 5;
+      await user.save();
+    }
+
     // If user not found, create with default credits
     if (!user) {
       console.log("creating user");
@@ -130,6 +135,97 @@ export const userCredit = async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+};
+
+// SAVE OR UPDATE USER PROFILE
+export const saveUserProfile = async (req, res) => {
+  try {
+    const clerkId = req.clerkId;
+    const { email, firstname, lastname, photo } = req.body;
+
+    if (!clerkId) {
+      return res.json({ success: false, message: "Not authorized" });
+    }
+
+    let user = await userModel.findOne({ clerkId });
+
+    if (!user) {
+      user = await userModel.create({
+        clerkId,
+        email,
+        firstname,
+        lastname,
+        photo,
+        creditBalance: 5
+      });
+    } else {
+      let updated = false;
+
+      if (user.creditBalance === undefined || user.creditBalance === null) {
+        user.creditBalance = 5;
+        updated = true;
+      }
+
+      if (email && user.email !== email) {
+        user.email = email;
+        updated = true;
+      }
+      if (firstname && user.firstname !== firstname) {
+        user.firstname = firstname;
+        updated = true;
+      }
+      if (lastname && user.lastname !== lastname) {
+        user.lastname = lastname;
+        updated = true;
+      }
+      if (photo && user.photo !== photo) {
+        user.photo = photo;
+        updated = true;
+      }
+
+      if (updated) {
+        await user.save();
+      }
+    }
+
+    res.json({
+      success: true,
+      credits: user.creditBalance,
+      user
+    });
+  } catch (error) {
+    console.log("error in saveUserProfile:", error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const ensureUser = async (req, res) => {
+  try {
+    const clerkId = req.clerkId;
+    if (!clerkId) {
+      return res.json({ success: false, message: "Not authorized" });
+    }
+
+    let user = await userModel.findOne({ clerkId });
+
+    if (!user) {
+      user = await userModel.create({
+        clerkId,
+        creditBalance: 5
+      });
+      console.log("ensureUser created user:", user);
+    }
+
+    if (user.creditBalance === undefined || user.creditBalance === null) {
+      user.creditBalance = 5;
+      await user.save();
+    }
+
+    res.json({ success: true, credits: user.creditBalance, user });
+  } catch (error) {
+    console.log("error in ensureUser:", error);
+    res.json({ success: false, message: error.message });
   }
 };
 

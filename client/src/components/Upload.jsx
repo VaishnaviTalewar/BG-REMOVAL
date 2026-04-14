@@ -7,11 +7,12 @@ const Upload = () => {
   const {removeBg} = useContext(AppContext)
 
   return (
-    <div className="relative py-28 px-6 lg:px-32 bg-gradient-to-b from-white via-violet-50 to-pink-50 overflow-hidden">
+    <div className="relative py-28 px-4 sm:px-6 lg:px-10 bg-gradient-to-b from-white via-violet-50 to-pink-50 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto">
 
       {/* Background Glow */}
-      <div className="absolute -top-40 left-10 w-[320px] h-[320px] bg-violet-300 opacity-30 blur-[140px] rounded-full"></div>
-      <div className="absolute -bottom-40 right-10 w-[320px] h-[320px] bg-fuchsia-300 opacity-30 blur-[140px] rounded-full"></div>
+      <div className="absolute -top-40 left-4 sm:left-10 w-72 sm:w-[320px] h-72 sm:h-[320px] bg-violet-300 opacity-30 blur-[140px] rounded-full"></div>
+      <div className="absolute -bottom-40 right-4 sm:right-10 w-72 sm:w-[320px] h-72 sm:h-[320px] bg-fuchsia-300 opacity-30 blur-[140px] rounded-full"></div>
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-2xl mx-auto">
@@ -46,6 +47,7 @@ const Upload = () => {
 
       </div>
     </div>
+  </div>
   );
 };
 

@@ -13,7 +13,7 @@ const Navbar = () => {
 
   return (
     <div className="sticky top-0 z-50 backdrop-blur-md bg-white/70 border-b border-gray-200">
-      <div className="flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-32 xl:px-44 py-3 sm:py-4">
+      <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-3 sm:py-4">
         
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
@@ -26,7 +26,7 @@ const Navbar = () => {
 
         {/* Right Side */}
         {isSignedIn ? (
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             
             {/* Credits Badge */}
             <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-blue-100 to-blue-200 px-2 sm:px-4 py-1 sm:py-1.5 rounded-full shadow-sm hover:shadow-md transition-all duration-300">
@@ -34,10 +34,10 @@ const Navbar = () => {
                 <img className="w-4 sm:w-5" src={assets.credit_icon} alt="credit" />
               </button>
               <p className="text-xs sm:text-sm font-semibold text-blue-800 hidden sm:block">
-                Credits : {credits}
+                Credits : {credits === null ? 5 : credits}
               </p>
               <p className="text-xs sm:text-sm font-semibold text-blue-800 sm:hidden">
-                {credits}
+                {credits === null ? 5 : credits}
               </p>
             </div>
             <p className="text-xs sm:text-sm hidden md:block">Hi, {user?.fullName}</p>

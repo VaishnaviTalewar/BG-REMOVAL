@@ -12,8 +12,8 @@ const Result = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 lg:px-32 py-16">
-
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 sm:px-6 lg:px-10 py-16">
+      <div className="max-w-screen-xl mx-auto">
       {/* Header */}
       <div className="text-center mb-14">
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -26,7 +26,7 @@ const Result = () => {
       </div>
 
       {/* Image Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* Original Image */}
         <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition duration-300 flex flex-col">
@@ -35,13 +35,17 @@ const Result = () => {
             Original Image
           </p>
 
-          <div className="rounded-xl overflow-hidden">
-            {image && (
+          <div className="rounded-xl overflow-hidden min-h-[260px] sm:min-h-[320px] bg-slate-50">
+            {image ? (
               <img
                 src={URL.createObjectURL(image)}
                 alt="original"
-                className="w-full object-cover hover:scale-105 transition duration-500"
+                className="w-full h-full object-contain hover:scale-105 transition duration-500"
               />
+            ) : (
+              <div className="flex h-full items-center justify-center text-gray-400 text-sm">
+                No image selected
+              </div>
             )}
           </div>
 
@@ -55,7 +59,7 @@ const Result = () => {
           </p>
 
           <div
-            className="rounded-xl overflow-hidden flex items-center justify-center min-h-[300px]"
+            className="rounded-xl overflow-hidden flex items-center justify-center min-h-[260px] sm:min-h-[320px]"
             style={{
               backgroundImage:
                 "linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0), linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0)",
@@ -112,8 +116,8 @@ const Result = () => {
         )}
 
       </div>
-
     </div>
+  </div>
   );
 };
 

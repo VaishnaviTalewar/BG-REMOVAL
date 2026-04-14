@@ -3,11 +3,12 @@ import { assets } from "../assets/assets";
 
 const Steps = () => {
   return (
-    <div className="relative px-6 lg:px-32 py-24 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
+    <div className="relative px-4 sm:px-6 lg:px-10 py-24 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto">
 
       {/* Background Glow */}
-      <div className="absolute -top-40 left-10 w-[300px] h-[300px] bg-purple-300 blur-[140px] opacity-30 rounded-full"></div>
-      <div className="absolute -bottom-40 right-10 w-[300px] h-[300px] bg-pink-300 blur-[140px] opacity-30 rounded-full"></div>
+      <div className="absolute -top-40 left-4 sm:left-10 w-72 sm:w-[300px] h-72 sm:h-[300px] bg-purple-300 blur-[140px] opacity-30 rounded-full"></div>
+      <div className="absolute -bottom-40 right-4 sm:right-10 w-72 sm:w-[300px] h-72 sm:h-[300px] bg-pink-300 blur-[140px] opacity-30 rounded-full"></div>
 
       {/* Heading */}
       <div className="text-center relative z-10">
@@ -116,6 +117,7 @@ const Steps = () => {
 
       </div>
     </div>
+  </div>
   );
 };
 

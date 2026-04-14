@@ -6,79 +6,63 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "./AppContext.js";
 
 const AppContextProvider = (props) => {
-
-  const [credits, setCredits] = useState(0);
-  const [image, setImage] = useState(false);
-  const [resultImg, setResultImg] = useState(false);
+  const [credits, setCredits] = useState(null);
+  const [image, setImage] = useState(null);
+  const [resultImg, setResultImg] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const { getToken } = useAuth();
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const { openSignIn } = useClerk();
 
-  const clerkId = user?.id || user?.userId || null;
+  const clerkId = user?.id ?? user?.userId ?? null;
 
-  // LOAD USER CREDITS
+  // LOAD CREDITS
   const loadCreditsData = useCallback(async () => {
+    if (!clerkId) return;
 
     try {
-
       const token = await getToken();
 
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-      if (clerkId) {
-        headers["X-Clerk-Id"] = clerkId;
-      }
       const { data } = await axios.get(
         backendUrl + "/api/user/credits",
-        { headers }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Clerk-Id": clerkId,
+          },
+        }
       );
 
       if (data.success) {
-        setCredits(data.credits);
+        setCredits(data.credits ?? 5);
       }
-
     } catch (error) {
-
       console.log(error);
       toast.error(error.message);
-
     }
+  }, [getToken, backendUrl, clerkId]);
 
-  }, [getToken, backendUrl, user]);
-
-  useEffect(() => {
-    if (isSignedIn && user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadCreditsData();
-    }
-  }, [isSignedIn, user, loadCreditsData]);
-
-
-  // REMOVE BACKGROUND FUNCTION
-  const removeBg = async (image) => {
-
+  // REMOVE BG FUNCTION (🔥 MAIN FIXED PART)
+  const removeBg = async (file) => {
     try {
-
       if (!isSignedIn) {
         return openSignIn();
       }
 
-      setImage(image);
-      setResultImg(false);
+      setImage(file);
+      setResultImg(null); // ✅ FIX (NOT false)
+      setLoading(true);
 
       navigate("/result");
 
       const token = await getToken();
 
       const formData = new FormData();
-
-      formData.append("image", image);
+      formData.append("image", file);
 
       const { data } = await axios.post(
         backendUrl + "/api/img/remove-bg",
@@ -86,19 +70,15 @@ const AppContextProvider = (props) => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "X-Clerk-Id": clerkId
-          }
+            "X-Clerk-Id": clerkId,
+          },
         }
       );
 
       if (data.success) {
-
-        // FIXED PART
-        setResultImg(data.resultImage);
+        setResultImg(data.resultImage); // ✅ FIX
         setCredits(data.credits);
-
       } else {
-
         toast.error(data.message);
 
         if (data.credits !== undefined) {
@@ -108,36 +88,48 @@ const AppContextProvider = (props) => {
         if (data.credits === 0) {
           navigate("/buy");
         }
-
       }
-
     } catch (error) {
-
       console.log(error);
       toast.error(error.message);
-
+    } finally {
+      setLoading(false);
     }
-
   };
 
+  const isUserReady = isLoaded && isSignedIn && Boolean(clerkId);
+
+  useEffect(() => {
+    if (!isUserReady) return;
+
+    if (credits === null) {
+      setCredits(5);
+    }
+
+    loadCreditsData();
+  }, [isUserReady, loadCreditsData]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setCredits(0);
+    }
+  }, [isLoaded, isSignedIn]);
 
   const value = {
-
     credits,
     setCredits,
-
     backendUrl,
-
     loadCreditsData,
 
     image,
     setImage,
 
-    removeBg,
-
     resultImg,
-    setResultImg
+    setResultImg,
 
+    removeBg,
+    loading,
   };
 
   return (
@@ -145,7 +137,6 @@ const AppContextProvider = (props) => {
       {props.children}
     </AppContext.Provider>
   );
-
 };
 
 export default AppContextProvider;

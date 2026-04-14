@@ -3,11 +3,12 @@ import { testimonialsData } from "../assets/assets";
 
 const Testimonials = () => {
   return (
-    <div className="relative px-6 lg:px-32 py-24 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
+    <div className="relative px-4 sm:px-6 lg:px-10 py-24 bg-gradient-to-b from-white via-purple-50 to-pink-50 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto">
 
       {/* Glow Background */}
-      <div className="absolute -top-32 left-20 w-[300px] h-[300px] bg-purple-300 opacity-30 blur-[120px] rounded-full"></div>
-      <div className="absolute -bottom-32 right-20 w-[300px] h-[300px] bg-pink-300 opacity-30 blur-[120px] rounded-full"></div>
+      <div className="absolute -top-32 left-4 sm:left-20 w-72 sm:w-[300px] h-72 sm:h-[300px] bg-purple-300 opacity-30 blur-[120px] rounded-full"></div>
+      <div className="absolute -bottom-32 right-4 sm:right-20 w-72 sm:w-[300px] h-72 sm:h-[300px] bg-pink-300 opacity-30 blur-[120px] rounded-full"></div>
 
       {/* Title */}
       <h1 className="mb-16 text-center text-3xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent relative z-10">
@@ -58,6 +59,7 @@ const Testimonials = () => {
 
       </div>
     </div>
+  </div>
   );
 };
 
