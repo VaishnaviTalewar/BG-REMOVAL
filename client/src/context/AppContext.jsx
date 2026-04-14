@@ -8,7 +8,7 @@ import { AppContext } from "./AppContext.js";
 const AppContextProvider = (props) => {
   const [credits, setCredits] = useState(null);
   const [image, setImage] = useState(null);
-  const [resultImg, setResultImg] = useState(null);
+  const [resultImg, setResultImg] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const AppContextProvider = (props) => {
     }
   }, [getToken, backendUrl, clerkId]);
 
-  // REMOVE BG FUNCTION (🔥 MAIN FIXED PART)
+  // REMOVE BG FUNCTION 
   const removeBg = async (file) => {
     try {
       if (!isSignedIn) {
@@ -54,7 +54,7 @@ const AppContextProvider = (props) => {
       }
 
       setImage(file);
-      setResultImg(null); // ✅ FIX (NOT false)
+      setResultImg(null); 
       setLoading(true);
 
       navigate("/result");
@@ -76,7 +76,7 @@ const AppContextProvider = (props) => {
       );
 
       if (data.success) {
-        setResultImg(data.resultImage); // ✅ FIX
+        setResultImg(data.resultImage); 
         setCredits(data.credits);
       } else {
         toast.error(data.message);

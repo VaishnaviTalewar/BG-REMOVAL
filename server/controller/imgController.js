@@ -52,11 +52,11 @@ export const removeBg = async (req, res) => {
       }
     );
 
-    // 🔥 DEBUG LOGS (IMPORTANT)
+    // DEBUG LOGS (IMPORTANT)
     console.log("STATUS:", response.status);
     console.log("CONTENT-TYPE:", response.headers["content-type"]);
 
-    // ❌ API FAIL CHECK
+    // API FAIL CHECK
     if (response.status !== 200) {
       console.log("API ERROR:", response.data.toString());
 
@@ -69,7 +69,7 @@ export const removeBg = async (req, res) => {
 
     const contentType = response.headers["content-type"] || "";
 
-    // ❌ NOT IMAGE CHECK (FIXED)
+    // NOT IMAGE CHECK (FIXED)
     if (!contentType.includes("image")) {
       console.log("INVALID RESPONSE:", response.data.toString());
 

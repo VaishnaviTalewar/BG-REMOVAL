@@ -18,7 +18,7 @@ const BuyCredit = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Initialize Razorpay
+  //  Initialize Razorpay
   const initPay = async (order) => {
     if (!window.Razorpay) {
       toast.error("Razorpay SDK not loaded");
@@ -82,7 +82,7 @@ const BuyCredit = () => {
     rzp.open();
   };
 
-  // 🔹 Handle Buy Credits
+  //Handle Buy Credits
   const buyCredits = async (planId) => {
     if (!isLoaded || !isSignedIn || !user) {
       toast.error("Please wait or sign in to purchase credits");

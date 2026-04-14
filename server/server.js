@@ -36,21 +36,21 @@ app.get("/", (req, res) => {
   res.json({ success: true, message: "API working" });
 });
 
-// 🔥 IMPORTANT FIX: DB connect FIRST then server start
+// IMPORTANT FIX: DB connect FIRST then server start
 const startServer = async () => {
   try {
     console.log("Connecting to DB...");
 
-    await connectDB(); // ✅ MUST WAIT HERE
+    await connectDB(); // MUST WAIT HERE
 
     const PORT = process.env.PORT || 4000;
 
     app.listen(PORT, () => {
-      console.log("✅ Server running on port", PORT);
+      console.log(" Server running on port", PORT);
     });
 
   } catch (error) {
-    console.log("❌ Server failed:", error.message);
+    console.log(" Server failed:", error.message);
     process.exit(1);
   }
 };
